@@ -42,6 +42,7 @@ userRouter.post("/login", async (req, res) => {
         if (result) {
           res.status(200).send({
             message: "Login successful",
+            userID: user[0]._id,
             // Generating the jwt token
             token: jwt.sign({ userID: user[0]._id }, process.env.secretKey),
           });
@@ -59,11 +60,11 @@ userRouter.post("/login", async (req, res) => {
   }
 });
 
-userRouter.patch("/update", async (req, res) => {
-  const { username } = req.query;
+userRouter.patch("/update/:id", async (req, res) => {
+  const { id } = req.params;
   const payload = req.body;
   try {
-    let user = await UserModel.find({ _id: id }, payload);
+    let user = await UserModel.findByIdAndUpdate({ _id: id }, payload);
     res.status(200).send({ message: "User successfully updated." });
   } catch (err) {
     res.status(400).send({ message: err.message });
@@ -72,7 +73,7 @@ userRouter.patch("/update", async (req, res) => {
 
 userRouter.get("/leaderboard", async (req, res) => {
   try {
-    let user = await UserModel.find({});
+    let user = await UserModel.find({}).sort({ score: -1 }).limit(3);
     res.status(200).send({ message: user });
   } catch (err) {
     res.status(400).send({ message: err.message });
